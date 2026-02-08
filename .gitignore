@@ -1,0 +1,41 @@
+# Criar pasta do projeto
+mkdir memed-node
+cd memed-node
+
+# Inicializar Git
+git init
+
+# Criar .gitignore
+touch .gitignore
+```
+
+**Cole isso no `.gitignore`:**
+```
+# Dependencies
+node_modules/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Tests
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
