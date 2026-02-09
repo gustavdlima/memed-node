@@ -41,8 +41,6 @@ export interface PrescritorCreateInput {
 
     email?: string;
 
-    avatar?: string;
-
     especialidade?: {
         id: number;
     };
@@ -65,7 +63,6 @@ export interface PrescritorUpdateInput {
     sexo?: Sexo;
     board?: ProfessionalBoard;
     email?: string;
-    avatar?: string;
     especialidade?: {
         id: number;
     };
@@ -86,7 +83,6 @@ export interface PrescritorAttributes {
     cpf: string;
     sexo: Sexo;
     email?: string;
-    avatar?: string;
     board: ProfessionalBoard;
 
     /** token to use on memed frontend */
