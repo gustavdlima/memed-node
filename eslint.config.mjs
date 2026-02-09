@@ -3,22 +3,17 @@ import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
-  // Ignore patterns
   {
     ignores: ['dist/**', 'node_modules/**', '*.config.ts', '*.config.js'],
   },
 
-  // Base ESLint recommended config
   eslint.configs.recommended,
 
-  // TypeScript recommended configs
   ...tseslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
 
-  // Prettier config (disables conflicting rules)
   prettierConfig,
 
-  // TypeScript parser configuration
   {
     languageOptions: {
       parserOptions: {
@@ -28,7 +23,6 @@ export default tseslint.config(
     },
   },
 
-  // Custom rules
   {
     rules: {
       '@typescript-eslint/no-unused-vars': [
