@@ -1,165 +1,110 @@
-## ROADMAP COMPLETO DE IMPLEMENTAÇÃO
+# memed-node
 
-#### **O QUE ESTAMOS CONSTRUÍNDO??**
+> Cliente Node.js não-oficial para a API da Memed de prescrição digital
 
-Uma biblioteca cliente (client library) que:
-- Abstrai chamadas HTTP para a API da Memed
-- Trata erros de forma amigável
-- Valida dados antes de enviar
-- É fácil de usar e manter
+[![npm version](https://img.shields.io/npm/v/memed-node.svg)](https://www.npmjs.com/package/memed-node)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-### **FASE 1: Setup**
-```
-1.1. Configurar projeto Node.js/TypeScript
-1.2. Configurar build (tsup)
-1.3. Configurar linting (eslint + prettier)
-1.4. Configurar testes (vitest)
-1.5. Criar estrutura de pastas
-1.6. Implementar HttpClient (abstração do fetch)
-1.7. Implementar MemedError (erros customizados)
-1.8. Implementar MemedClient (classe principal)
-```
+## Sobre
 
-### **FASE 2: Resource Prescritor (MVP)**
-```
-2.1. Definir tipos TypeScript para Prescritor
-2.2. Implementar PrescritorResource
-     - create() - cadastrar médico
-     - get() - buscar por external_id
-     - list() - listar todos
-     - update() - atualizar dados
-     - delete() - remover
-2.3. Escrever testes unitários
-2.4. Criar exemplo de uso
-2.5. Testar contra API real (integration tests)
+`memed-node` é uma biblioteca cliente **não-oficial** que simplifica a integração com a API da Memed, plataforma de prescrição digital no Brasil.
+
+- **Tipagem forte**: Autocomplete e validação em tempo de desenvolvimento
+- **API intuitiva**: Métodos simples e bem documentados
+- **Tratamento de erros**: Mensagens amigáveis em português
+- **Zero dependências**: Usa fetch nativo do Node.js 18+
+- **ESM e CommonJS**: Suporte a ambos os formatos de módulo
+- **Múltiplos profissionais**: Suporte a CRM, CRO, COREN, CRF, e mais
+
+## Instalação
+
+```bash
+npm install memed-node
 ```
 
-### **FASE 3: Resource Prescrição**
-```
-3.1. Definir tipos para Prescrição
-3.2. Implementar PrescricaoResource
-     - list() - listar prescrições do médico
-     - get() - buscar por ID
-     - getLink() - obter link para paciente
-     - getPdf() - baixar PDF
-     - delete() - remover prescrição
-3.3. Testes
+**Requisitos:**
+- Node.js >= 18.0.0
+
+## Uso Rápido
+
+```typescript
+import { MemedClient } from 'memed-node';
+
+const memed = new MemedClient({
+  apiKey: process.env.MEMED_API_KEY,
+  secretKey: process.env.MEMED_SECRET_KEY,
+  environment: 'integration', // ou 'production'
+});
+
+// Criar prescritor
+const medico = await memed.prescritor.create({
+  external_id: 'med-123',
+  nome: 'Maria',
+  sobrenome: 'Santos',
+  data_nascimento: '15/03/1985',
+  cpf: '12345678900',
+  sexo: 'F',
+  board: {
+    board_code: 'CRM',
+    board_number: '98765',
+    board_state: 'RJ',
+  },
+  email: 'maria@exemplo.com',
+});
+
+console.log(medico.token); // Token para usar no frontend da Memed
 ```
 
-### **FASE 4: Resource Protocolo**
-```
-4.1. Definir tipos para Protocolo
-4.2. Implementar ProtocoloResource
-     - create() - criar protocolo (template)
-     - get() - buscar protocolo
-     - list() - listar protocolos
-     - update() - atualizar
-     - delete() - remover
-     - createMultiple() - cadastro em lote
-4.3. Testes
-```
+## Documentação
 
-### **FASE 5: Resource Impressão**
-```
-5.1. Definir tipos para configurações de impressão
-5.2. Implementar ImpressaoResource
-     - getConfig() - obter configurações
-     - updateConfig() - atualizar configurações
-5.3. Testes
-```
+Para documentação detalhada, exemplos avançados e guias, acesse:
 
-### **FASE 6: Validações e Helpers**
-```
-6.1. Validador de CPF
-6.2. Validador de CRM
-6.3. Formatadores de data (DD/MM/YYYY)
-6.4. Helper para construir medicamentos (array complexo)
-6.5. Testes das validações
-```
+**[📚 Documentação →](./docs/README.md)**
 
-### **FASE 7: Tratamento de Erros**
-```
-7.1. Mapear códigos de erro da API
-7.2. Mensagens em português
-7.3. Retry automático em erros 5xx
-7.4. Rate limiting (se necessário)
-```
+Incluindo:
+- [Configuração e inicialização](./docs/README.md#configuração)
+- [API de Prescritores - CRUD completo](./docs/README.md#prescritor-profissionais-de-saúde)
+- [Tratamento de erros](./docs/README.md#tratamento-de-erros)
+- [Guia de desenvolvimento](./docs/README.md#desenvolvimento)
+- [Como contribuir](./docs/README.md#contribuindo)
 
-### **FASE 8: Documentação**
-```
-8.1. README detalhado com exemplos
-8.2. JSDoc em todos os métodos públicos
-8.3. Guia de migração (se alguém usa fetch direto)
-8.4. Exemplos práticos (pasta examples/)
-8.5. CHANGELOG.md
-```
+## Recursos
 
-### **FASE 9: Publicação**
-```
-9.1. Configurar npm package
-9.2. Semantic versioning
-9.3. GitHub Actions (CI/CD)
-     - Rodar testes em PRs
-     - Build automático
-     - Publicação automática no npm
-9.4. Publicar v0.1.0 no npm
-```
+### Implementados
 
-### **FASE 10: Extras (Opcional)**
-```
-10.1. Suporte a Memed Bridge
-10.2. Webhooks/eventos
-10.3. Cache de tokens
-10.4. Logs/debugging
-```
+- [x] **Prescritor** - CRUD completo para profissionais de saúde
+- [x] Suporte a múltiplos conselhos (CRM, CRO, COREN, etc)
+- [x] Tratamento de erros customizado
+- [x] Timeout configurável
+- [x] Ambientes (integration/production)
+
+### Em Desenvolvimento
+
+- [ ] **Prescrição** - Gerenciar receitas médicas
+- [ ] **Protocolo** - Templates de prescrição
+- [ ] **Impressão** - Configurações de layout
+- [ ] Validações (CPF, datas, etc)
+- [ ] Retry automático em erros 5xx
+- [ ] Cache de tokens
+
+## Links Úteis
+
+- [📚 Documentação Completa](./docs/README.md)
+- [🗺️ Roadmap & Futuras Features](./docs/ROADMAP.md)
+- [📝 Exemplos de Uso](./examples)
+- [📋 Changelog](./CHANGELOG.md)
+- [🐛 Reportar Issues](https://github.com/seu-usuario/memed-node/issues)
+- [📖 Documentação oficial da Memed](https://doc.memed.com.br/)
+
+## Contribuindo
+
+Contribuições são bem-vindas! Veja o [guia de contribuição](./docs/README.md#contribuindo) para mais detalhes.
+
+## Licença
+
+[MIT](./LICENSE) © [gustavo martins]
 
 ---
 
-## Estrutura Final de Arquivos
-```
-memed-node/
-├── src/
-│   ├── client/
-│   │   ├── HttpClient.ts
-│   │   └── MemedClient.ts
-│   ├── resources/
-│   │   ├── Prescritor.ts
-│   │   ├── Prescricao.ts
-│   │   ├── Protocolo.ts
-│   │   └── Impressao.ts
-│   ├── types/
-│   │   ├── common.types.ts
-│   │   ├── prescritor.types.ts
-│   │   ├── prescricao.types.ts
-│   │   ├── protocolo.types.ts
-│   │   └── impressao.types.ts
-│   ├── errors/
-│   │   └── MemedError.ts
-│   ├── utils/
-│   │   ├── validators.ts 
-│   │   ├── formatters.ts
-│   │   └── helpers.ts
-│   └── index.ts
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── helpers/
-├── examples/
-│   ├── basic.ts
-│   ├── complete.ts
-│   └── error-handling.ts
-├── .github/
-│   └── workflows/
-│       ├── test.yml
-│       └── publish.yml
-├── package.json
-├── tsconfig.json
-├── tsup.config.ts
-├── vitest.config.ts
-├── .eslintrc.json
-├── .prettierrc
-├── .gitignore
-├── README.md
-├── CHANGELOG.md
-└── LICENSE
-```
+**Aviso Legal:** Esta biblioteca não é oficialmente mantida pela Memed. Para suporte oficial, consulte a [documentação da Memed](https://doc.memed.com.br/).
