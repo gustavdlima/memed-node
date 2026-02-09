@@ -20,7 +20,7 @@ Uma biblioteca cliente (client library) que:
 1.8. Implementar MemedClient (classe principal)
 ```
 
-### **FASE 2: Resource Prescritor (MVP)**⚕
+### **FASE 2: Resource Prescritor (MVP)**
 ```
 2.1. Definir tipos TypeScript para Prescritor
 2.2. Implementar PrescritorResource
