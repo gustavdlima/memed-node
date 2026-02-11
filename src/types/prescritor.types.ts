@@ -114,18 +114,49 @@ export interface PrescritorResponse {
 }
 
 /**
+ * Single item in prescriber list response
+ */
+export interface PrescritorListItem {
+    type: 'usuarios';
+    id: string;
+    attributes: PrescritorAttributes;
+}
+
+/**
  * Api return to prescriber list
  */
 export interface PrescritorListResponse {
-    data: Array<{
-        type: 'usuarios';
-        id: string;
-        attributes: PrescritorAttributes;
-    }>;
+    data: PrescritorListItem[];
     links: {
         self: string;
     };
     meta: {
         total: number;
+    };
+}
+
+/**
+ * Attributes without relationships for payload
+ */
+export type PrescritorPayloadAttributes = Omit<PrescritorCreateInput | PrescritorUpdateInput, 'especialidade' | 'cidade'>;
+
+/**
+ * Relationship reference with id
+ */
+export interface RelationshipRef {
+    data: { id: number };
+}
+
+/**
+ * JSON:API payload structure for prescriber requests
+ */
+export interface PrescritorPayload {
+    data: {
+        type: 'usuarios';
+        attributes: PrescritorPayloadAttributes;
+        relationships?: {
+            especialidade?: RelationshipRef;
+            cidade?: RelationshipRef;
+        };
     };
 }

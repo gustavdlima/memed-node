@@ -7,21 +7,25 @@ import { clearTimeout } from "node:timers";
  */
 export class HttpClient {
     constructor (
-        private readonly baseUrl: string,
+        private readonly _baseUrl: string,
         private readonly apiKey: string,
         private readonly secretKey: string,
         private readonly timeout : number = 30000
     ) {}
 
+    get baseUrl(): string {
+        return this._baseUrl;
+    }
+
     private buildUrl(path: string, params?: Record<string, unknown>): string {
-        const cleanPath = path.startsWith("/") ? path.slice(1) : path;
-        const url = new URL(cleanPath, this.baseUrl);
+        const cleanPath: string = path.startsWith("/") ? path.slice(1) : path;
+        const url: URL = new URL(cleanPath, this._baseUrl);
 
         url.searchParams.append("api-key", this.apiKey);
         url.searchParams.append('secret-key', this.secretKey);
 
         if (params) {
-            Object.entries(params).forEach(([key, value]) => {
+            Object.entries(params).forEach(([key, value]: [string, unknown]): void => {
                 if (value !== undefined && value !== null) {
                     url.searchParams.append(key, String(value));
                 }
@@ -40,13 +44,13 @@ export class HttpClient {
         body?: unknown,
         params?: Record<string, unknown>,
     ): Promise<T> {
-        const url = this.buildUrl(path, params);
+        const url: string = this.buildUrl(path, params);
 
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+            const controller: AbortController = new AbortController();
+            const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => controller.abort(), this.timeout);
 
-            const response = await fetch(url, {
+            const response: Response = await fetch(url, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +67,7 @@ export class HttpClient {
             }
 
             return (await response.json()) as T;
-        } catch (error) {
+        } catch (error: unknown) {
             if (error instanceof MemedError) {
                 throw error;
             }
@@ -88,10 +92,10 @@ export class HttpClient {
         let errorData: unknown;
 
         try {
-            const text = await response.text();
+            const text: string = await response.text();
 
             try {
-                errorData = JSON.parse(text);
+                errorData = JSON.parse(text) as unknown;
             } catch {
                 errorData = text;
             }
@@ -99,7 +103,7 @@ export class HttpClient {
             errorData = {};
         }
 
-        const message = this.getErrorMessage(response.status, errorData);
+        const message: string = this.getErrorMessage(response.status, errorData);
 
         throw new MemedError(message, response.status, errorData);
     }
