@@ -49,7 +49,7 @@ describe('HttpClient', () => {
             global.fetch = vi.fn().mockResolvedValue({
                 ok: false,
                 status: 401,
-                json: async () => ({ message: 'Não Autorizado' }),
+                text: async () => JSON.stringify({ message: 'Não Autorizado' }),
             });
 
             await expect(client.get('/test')).rejects.toThrow(MemedError);

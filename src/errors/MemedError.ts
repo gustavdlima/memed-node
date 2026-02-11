@@ -31,7 +31,13 @@ export class MemedError extends Error {
         return this.statusCode !== undefined && this.statusCode >=500;
     }
 
-    toJSON() {
+    toJSON(): {
+        name: string;
+        message: string;
+        statusCode: number | undefined;
+        timestamp: string;
+        response: unknown;
+    } {
         return {
             name: this.name,
             message: this.message,

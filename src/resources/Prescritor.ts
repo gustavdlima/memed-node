@@ -4,7 +4,10 @@ import {
     PrescritorUpdateInput,
     PrescritorResponse,
     PrescritorListResponse,
+    PrescritorListItem,
     PrescritorAttributes,
+    PrescritorPayload,
+    PrescritorPayloadAttributes,
 } from '../types/prescritor.types';
 
 /**
@@ -21,9 +24,9 @@ export class PrescritorResource {
      *
      */
     async create(data: PrescritorCreateInput): Promise<PrescritorAttributes> {
-        const payload = this.buildPayload(data);
+        const payload: PrescritorPayload = this.buildPayload(data);
 
-        const response = await this.http.post<PrescritorResponse>(
+        const response: PrescritorResponse = await this.http.post<PrescritorResponse>(
             '/sinapse-prescricao/usuarios',
             payload
         );
@@ -39,7 +42,7 @@ export class PrescritorResource {
      *
      */
     async get(externalId: string): Promise<PrescritorAttributes> {
-        const response = await this.http.get<PrescritorResponse>(
+        const response: PrescritorResponse = await this.http.get<PrescritorResponse>(
             `/sinapse-prescricao/usuarios/${externalId}`
         );
 
@@ -53,11 +56,11 @@ export class PrescritorResource {
      *
      */
     async list(): Promise<PrescritorAttributes[]> {
-        const response = await this.http.get<PrescritorListResponse>(
+        const response: PrescritorListResponse = await this.http.get<PrescritorListResponse>(
             '/sinapse-prescricao/usuarios'
         );
 
-        return response.data.map((item) => item.attributes);
+        return response.data.map((item: PrescritorListItem): PrescritorAttributes => item.attributes);
     }
 
     /**
@@ -72,9 +75,9 @@ export class PrescritorResource {
         externalId: string,
         data: PrescritorUpdateInput
     ): Promise<PrescritorAttributes> {
-        const payload = this.buildPayload(data);
+        const payload: PrescritorPayload = this.buildPayload(data);
 
-        const response = await this.http.patch<PrescritorResponse>(
+        const response: PrescritorResponse = await this.http.patch<PrescritorResponse>(
             `/sinapse-prescricao/usuarios/${externalId}`,
             payload
         );
@@ -97,13 +100,16 @@ export class PrescritorResource {
      */
     private buildPayload(
         data: PrescritorCreateInput | PrescritorUpdateInput
-    ): object {
-        const { especialidade, cidade, ...attributes } = data;
+    ): PrescritorPayload {
+        const especialidade: { id: number } | undefined = data.especialidade;
+        const cidade: { id: number } | undefined = data.cidade;
+        const { especialidade: _esp, cidade: _cid, ...attributes } = data;
+        const payloadAttributes: PrescritorPayloadAttributes = attributes;
 
-        const payload: any = {
+        const payload: PrescritorPayload = {
             data: {
                 type: 'usuarios',
-                attributes,
+                attributes: payloadAttributes,
             },
         };
 

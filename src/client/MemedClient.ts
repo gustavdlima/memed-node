@@ -27,19 +27,17 @@ export class MemedClient {
     constructor(config: MemedConfig) {
         this.validateConfig(config);
 
-        const {
-            apiKey,
-            secretKey,
-            environment = 'integration',
-            timeout = 30000,
-        } = config;
+        const apiKey: string = config.apiKey;
+        const secretKey: string = config.secretKey;
+        const environment: Environment = config.environment ?? 'integration';
+        const timeout: number = config.timeout ?? 30000;
 
-        const baseUrl = BASE_URLS[environment];
+        const baseUrl: string = BASE_URLS[environment];
         this.httpClient = new HttpClient(baseUrl, apiKey, secretKey, timeout);
         this.prescritor = new PrescritorResource(this.httpClient);
     }
 
-    private validateConfig(config: MemedConfig) {
+    private validateConfig(config: MemedConfig): void {
         if (!config.apiKey || config.apiKey.trim() === '') {
             throw new Error('MemedClient: apiKey é obrigatório')
         }
@@ -63,8 +61,9 @@ export class MemedClient {
         environment: Environment;
         baseUrl: string;
     } {
-        const environment = (Object.keys(BASE_URLS) as Environment[]).find(
-            (env) => BASE_URLS[env] === (this.httpClient as any).baseUrl)!;
+        const environment: Environment = (Object.keys(BASE_URLS) as Environment[]).find(
+            (env: Environment): boolean => BASE_URLS[env] === this.httpClient.baseUrl
+        ) as Environment;
 
         return {
             environment,
