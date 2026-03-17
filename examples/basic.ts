@@ -81,6 +81,26 @@ async function main() {
         );
         console.log('✅ Email atualizado:', medicoAtualizado.email);
 
+        // === Prescrições ===
+        console.log('\n--- Prescrições ---');
+
+        // Listar prescrições do médico
+        console.log('\n📋 Listando prescrições...');
+        const prescricoes = await memed.prescricao.list({
+            prescritorId: medico.external_id,
+            limit: 10,
+        });
+        console.log(`✅ ${prescricoes.length} prescrições encontradas`);
+
+        // Buscar princípios ativos (não precisa de prescritor)
+        console.log('\n🔬 Buscando princípios ativos...');
+        const ingredientes = await memed.prescricao.searchIngredients({
+            terms: 'dipirona',
+            limit: 5,
+        });
+        console.log(`✅ ${ingredientes.length} ingredientes encontrados`);
+        ingredientes.forEach(i => console.log(`   - ${i.nome} (${i.slug})`));
+
         // Deletar prescritores
         console.log('\n🗑️  Deletando prescritores de teste...');
         await memed.prescritor.delete(medico.external_id);

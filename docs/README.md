@@ -14,6 +14,12 @@
   - [Atualizar Prescritor](#atualizar-prescritor)
   - [Deletar Prescritor](#deletar-prescritor)
   - [Tipos de Conselho Suportados](#tipos-de-conselho-suportados)
+- [Prescrição (Receitas Médicas)](#prescrição-receitas-médicas)
+  - [Listar Prescrições](#listar-prescrições)
+  - [Deletar Prescrição](#deletar-prescrição)
+  - [Link Digital](#link-digital)
+  - [URL do PDF](#url-do-pdf)
+  - [Buscar Princípios Ativos](#buscar-princípios-ativos)
 - [Tratamento de Erros](#tratamento-de-erros)
 - [Desenvolvimento](#desenvolvimento)
 - [Contribuindo](#contribuindo)
@@ -225,6 +231,99 @@ const enfermeiro = await memed.prescritor.create({
 
 ---
 
+## Prescrição (Receitas Médicas)
+
+A API de prescrições permite consultar o histórico de receitas, obter links digitais e PDFs. A criação de prescrições é feita pelo módulo frontend da Memed (widget/iframe).
+
+> **Token automático:** Todos os métodos que precisam do token do prescritor o resolvem automaticamente via `GET /sinapse-prescricao/usuarios/{id}`, já que o token da Memed não é estático.
+
+### Listar Prescrições
+
+Lista o histórico de prescrições de um prescritor. Retorna as últimas 10 por padrão.
+
+```typescript
+// Listagem simples
+const prescricoes = await memed.prescricao.list({
+  prescritorId: 'seu-external-id',
+});
+
+// Com filtros e paginação
+const prescricoes = await memed.prescricao.list({
+  prescritorId: 'seu-external-id',
+  limit: 50,
+  offset: 0,
+  initialDate: '2026-01-01',  // YYYY-MM-DD
+  finalDate: '2026-03-01',
+  structuredDocuments: true,
+});
+```
+
+#### Opções de Filtro
+
+| Propriedade | Tipo | Obrigatório | Observações |
+|---|---|---|---|
+| `prescritorId` | string | Sim | CPF, external_id ou registro+UF |
+| `limit` | number | | Máximo 100 |
+| `offset` | number | | Para paginação |
+| `initialDate` | string | | Formato YYYY-MM-DD |
+| `finalDate` | string | | Formato YYYY-MM-DD |
+| `structuredDocuments` | boolean | | Incluir documentos estruturados |
+
+### Deletar Prescrição
+
+Remove uma prescrição pelo ID.
+
+```typescript
+await memed.prescricao.delete('seu-external-id', 42);
+```
+
+### Link Digital
+
+Obtém o link digital compartilhável de uma prescrição e o código de desbloqueio.
+
+```typescript
+const { link, codigoDesbloqueio } = await memed.prescricao.getDigitalLink(
+  'seu-external-id',
+  42
+);
+
+console.log('Link:', link);
+console.log('Código:', codigoDesbloqueio);
+```
+
+### URL do PDF
+
+Obtém a URL para download do PDF de uma prescrição.
+
+```typescript
+const pdfUrl = await memed.prescricao.getPdfUrl('seu-external-id', 42);
+console.log('PDF:', pdfUrl);
+```
+
+### Buscar Princípios Ativos
+
+Busca princípios ativos (ingredientes) na base da Memed. Este método usa autenticação via api-key/secret-key, não precisa de prescritor.
+
+```typescript
+// Busca simples
+const ingredientes = await memed.prescricao.searchIngredients({
+  terms: 'dipirona',
+});
+
+// Com opções
+const ingredientes = await memed.prescricao.searchIngredients({
+  terms: 'paracetamol',
+  limit: 10,
+  orderField: 'nome',
+  orderSort: 'ASC',
+});
+
+console.log(ingredientes[0].nome);  // Nome do ingrediente
+console.log(ingredientes[0].slug);  // Slug do ingrediente
+```
+
+---
+
 ## Tratamento de Erros
 
 A biblioteca fornece a classe `MemedError` com métodos auxiliares para identificar tipos de erro.
@@ -361,10 +460,12 @@ memed-node/
 │   │   ├── HttpClient.ts        # Cliente HTTP base
 │   │   └── MemedClient.ts       # Cliente principal
 │   ├── resources/
-│   │   └── PrescritorResource.ts # API de prescritores
+│   │   ├── Prescritor.ts        # API de prescritores
+│   │   └── Prescricao.ts        # API de prescrições
 │   ├── types/
 │   │   ├── common.types.ts      # Tipos comuns
-│   │   └── prescritor.types.ts  # Tipos de prescritor
+│   │   ├── prescritor.types.ts  # Tipos de prescritor
+│   │   └── prescricao.types.ts  # Tipos de prescrição
 │   ├── errors/
 │   │   └── MemedError.ts        # Classe de erro customizada
 │   └── index.ts                 # Exports públicos

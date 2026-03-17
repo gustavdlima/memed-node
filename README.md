@@ -54,6 +54,18 @@ const medico = await memed.prescritor.create({
 });
 
 console.log(medico.token); // Token para usar no frontend da Memed
+
+// Listar prescrições (token resolvido automaticamente)
+const prescricoes = await memed.prescricao.list({
+  prescritorId: 'med-123',
+  initialDate: '2026-01-01',
+  limit: 50,
+});
+
+// Buscar princípios ativos
+const ingredientes = await memed.prescricao.searchIngredients({
+  terms: 'dipirona',
+});
 ```
 
 ## Documentação
@@ -65,6 +77,7 @@ Para documentação detalhada, exemplos avançados e guias, acesse:
 Incluindo:
 - [Configuração e inicialização](./docs/README.md#configuração)
 - [API de Prescritores - CRUD completo](./docs/README.md#prescritor-profissionais-de-saúde)
+- [API de Prescrições - Histórico e documentos](./docs/README.md#prescrição-receitas-médicas)
 - [Tratamento de erros](./docs/README.md#tratamento-de-erros)
 - [Guia de desenvolvimento](./docs/README.md#desenvolvimento)
 - [Como contribuir](./docs/README.md#contribuindo)
@@ -74,14 +87,15 @@ Incluindo:
 ### Implementados
 
 - [x] **Prescritor** - CRUD completo para profissionais de saúde
+- [x] **Prescrição** - Histórico, link digital, PDF e busca de ingredientes
 - [x] Suporte a múltiplos conselhos (CRM, CRO, COREN, etc)
+- [x] Resolução automática de token do prescritor
 - [x] Tratamento de erros customizado
 - [x] Timeout configurável
 - [x] Ambientes (integration/production)
 
 ### Em Desenvolvimento
 
-- [ ] **Prescrição** - Gerenciar receitas médicas
 - [ ] **Protocolo** - Templates de prescrição
 - [ ] **Impressão** - Configurações de layout
 - [ ] Validações (CPF, datas, etc)

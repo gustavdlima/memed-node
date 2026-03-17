@@ -12,6 +12,15 @@ export type {
     ProfessionalBoard
 } from './types/prescritor.types';
 
+export type {
+    PrescricaoListOptions,
+    PrescricaoAttributes,
+    PrescricaoMedicamento,
+    PrescricaoPaciente,
+    Ingrediente,
+    IngredienteSearchOptions,
+} from './types/prescricao.types';
+
 // ============================================
 // ERRORS
 // ============================================
