@@ -17,7 +17,7 @@ export class HttpClient {
         return this._baseUrl;
     }
 
-    private buildUrl(path: string, params?: Record<string, unknown>): string {
+    private buildUrl(path: string, params?: Record<string, string | number | boolean>): string {
         const cleanPath: string = path.startsWith("/") ? path.slice(1) : path;
         const url: URL = new URL(cleanPath, this._baseUrl);
 
@@ -25,7 +25,7 @@ export class HttpClient {
         url.searchParams.append('secret-key', this.secretKey);
 
         if (params) {
-            Object.entries(params).forEach(([key, value]: [string, unknown]): void => {
+            Object.entries(params).forEach(([key, value]: [string, string | number | boolean]): void => {
                 if (value !== undefined && value !== null) {
                     url.searchParams.append(key, String(value));
                 }
@@ -42,7 +42,7 @@ export class HttpClient {
         method: string,
         path: string,
         body?: unknown,
-        params?: Record<string, unknown>,
+        params?: Record<string, string | number | boolean>,
     ): Promise<T> {
         const url: string = this.buildUrl(path, params);
 
@@ -135,14 +135,14 @@ export class HttpClient {
         }
     }
 
-    async get<T>(path: string, params?: Record<string, unknown>): Promise<T> {
+    async get<T>(path: string, params?: Record<string, string | number | boolean>): Promise<T> {
         return this.request<T>('GET', path, undefined, params);
     }
 
     async post<T>(
         path: string,
         body: unknown,
-        params?: Record<string, unknown>
+        params?: Record<string, string | number | boolean>
     ): Promise<T> {
         return this.request<T>('POST', path, body, params);
     }
@@ -150,12 +150,12 @@ export class HttpClient {
     async patch<T>(
         path: string,
         body: unknown,
-        params?: Record<string, unknown>
+        params?: Record<string, string | number | boolean>
     ): Promise<T> {
         return this.request<T>('PATCH', path, body, params);
     }
 
-    async delete<T>(path: string, params?: Record<string, unknown>): Promise<T> {
+    async delete<T>(path: string, params?: Record<string, string | number | boolean>): Promise<T> {
         return this.request<T>('DELETE', path, undefined, params);
     }
 }
