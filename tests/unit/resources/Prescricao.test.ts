@@ -208,6 +208,87 @@ describe('PrescricaoResource', () => {
         });
     });
 
+    describe('get (single prescription with Bearer auth)', () => {
+        it('should use Authorization Bearer header instead of token query param', async () => {
+            const mockPrescricao = {
+                data: {
+                    type: 'prescricoes',
+                    id: '42',
+                    attributes: {
+                        id: 42,
+                        data: '2026-01-15',
+                        horario: '10:00',
+                        medicamentos: [],
+                        paciente: { id: 1, nome: 'Paciente' },
+                        status: 'ativa',
+                        created_at: '2026-01-15',
+                        updated_at: '2026-01-15',
+                    },
+                },
+            };
+
+            global.fetch = vi.fn()
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => mockPrescritorResponse,
+                })
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => mockPrescricao,
+                });
+
+            const result = await prescricao.get('med-123', 42);
+
+            const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls;
+
+            // Second call should have Bearer header
+            const headers = calls[1][1].headers;
+            expect(headers['Authorization']).toBe(`Bearer ${MOCK_TOKEN}`);
+
+            // URL should NOT have token as query param
+            const url: string = calls[1][0];
+            expect(url).toContain('/prescricoes/42');
+            expect(url).toContain('structuredDocuments=true');
+            expect(url).not.toContain(`token=${MOCK_TOKEN}`);
+
+            expect(result.id).toBe(42);
+        });
+
+        it('should allow disabling structuredDocuments', async () => {
+            const mockPrescricao = {
+                data: {
+                    type: 'prescricoes',
+                    id: '42',
+                    attributes: {
+                        id: 42,
+                        data: '2026-01-15',
+                        horario: '10:00',
+                        medicamentos: [],
+                        paciente: { id: 1, nome: 'Paciente' },
+                        status: 'ativa',
+                        created_at: '2026-01-15',
+                        updated_at: '2026-01-15',
+                    },
+                },
+            };
+
+            global.fetch = vi.fn()
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => mockPrescritorResponse,
+                })
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => mockPrescricao,
+                });
+
+            await prescricao.get('med-123', 42, false);
+
+            const url: string = (fetch as ReturnType<typeof vi.fn>).mock.calls[1][0];
+            expect(url).not.toContain('structuredDocuments');
+        });
+    });
+
     describe('searchIngredients', () => {
         it('should NOT resolve token (uses api-key/secret-key only)', async () => {
             global.fetch = vi.fn().mockResolvedValueOnce({

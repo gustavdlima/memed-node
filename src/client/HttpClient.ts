@@ -43,6 +43,7 @@ export class HttpClient {
         path: string,
         body?: unknown,
         params?: Record<string, string | number | boolean>,
+        bearerToken?: string,
     ): Promise<T> {
         const url: string = this.buildUrl(path, params);
 
@@ -50,12 +51,18 @@ export class HttpClient {
             const controller: AbortController = new AbortController();
             const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => controller.abort(), this.timeout);
 
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                Accept: 'application/vnd.api+json',
+            };
+
+            if (bearerToken) {
+                headers['Authorization'] = `Bearer ${bearerToken}`;
+            }
+
             const response: Response = await fetch(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/vnd.api+json',
-                },
+                headers,
                 body: body ? JSON.stringify(body) : undefined,
                 signal: controller.signal,
             });
@@ -135,8 +142,12 @@ export class HttpClient {
         }
     }
 
-    async get<T>(path: string, params?: Record<string, string | number | boolean>): Promise<T> {
-        return this.request<T>('GET', path, undefined, params);
+    async get<T>(
+        path: string,
+        params?: Record<string, string | number | boolean>,
+        bearerToken?: string
+    ): Promise<T> {
+        return this.request<T>('GET', path, undefined, params, bearerToken);
     }
 
     async post<T>(

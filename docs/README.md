@@ -15,6 +15,7 @@
   - [Deletar Prescritor](#deletar-prescritor)
   - [Tipos de Conselho Suportados](#tipos-de-conselho-suportados)
 - [Prescrição (Receitas Médicas)](#prescrição-receitas-médicas)
+  - [Buscar Prescrição por ID](#buscar-prescrição-por-id)
   - [Listar Prescrições](#listar-prescrições)
   - [Deletar Prescrição](#deletar-prescrição)
   - [Link Digital](#link-digital)
@@ -239,6 +240,18 @@ const enfermeiro = await memed.prescritor.create({
 A API de prescrições permite consultar o histórico de receitas, obter links digitais e PDFs. A criação de prescrições é feita pelo módulo frontend da Memed (widget/iframe).
 
 > **Token automático:** Todos os métodos que precisam do token do prescritor o resolvem automaticamente via `GET /sinapse-prescricao/usuarios/{id}`, já que o token da Memed não é estático.
+
+### Buscar Prescrição por ID
+
+Busca uma prescrição específica com documentos estruturados. Usa `Authorization: Bearer` como a API da Memed exige.
+
+```typescript
+// Com documentos estruturados (padrão)
+const prescricao = await memed.prescricao.get('seu-external-id', 42);
+
+// Sem documentos estruturados
+const prescricao = await memed.prescricao.get('seu-external-id', 42, false);
+```
 
 ### Listar Prescrições
 

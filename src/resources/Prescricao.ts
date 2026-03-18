@@ -3,6 +3,7 @@ import { PrescritorResponse } from '../types/prescritor.types';
 import {
     PrescricaoListOptions,
     PrescricaoAttributes,
+    PrescricaoResponse,
     PrescricaoListResponse,
     PrescricaoListItem,
     PrescricaoDigitalLinkResponse,
@@ -72,6 +73,37 @@ export class PrescricaoResource {
         );
 
         return response.data.map((item: PrescricaoListItem): PrescricaoAttributes => item.attributes);
+    }
+
+    /**
+     * Get a single prescription by ID with structured documents
+     *
+     * Uses Authorization: Bearer header as required by Memed API.
+     *
+     * @param prescritorId - CPF, external_id, or registro+UF
+     * @param prescricaoId - Prescription ID
+     * @param structuredDocuments - Include structured document data (default: true)
+     */
+    async get(
+        prescritorId: string,
+        prescricaoId: number,
+        structuredDocuments: boolean = true
+    ): Promise<PrescricaoAttributes> {
+        const token: string = await this.resolveToken(prescritorId);
+
+        const params: Record<string, string | number | boolean> = {};
+
+        if (structuredDocuments) {
+            params['structuredDocuments'] = true;
+        }
+
+        const response: PrescricaoResponse = await this.http.get<PrescricaoResponse>(
+            `/prescricoes/${prescricaoId}`,
+            params,
+            token
+        );
+
+        return response.data.attributes;
     }
 
     /**

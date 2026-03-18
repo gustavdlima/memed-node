@@ -66,6 +66,32 @@ describe('HttpClient', () => {
         });
     });
 
+    describe('Bearer token auth', () => {
+        it('should add Authorization Bearer header when bearerToken is provided', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            await client.get('/test', {}, 'my-jwt-token');
+
+            const headers = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].headers;
+            expect(headers['Authorization']).toBe('Bearer my-jwt-token');
+        });
+
+        it('should NOT add Authorization header when bearerToken is not provided', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            await client.get('/test');
+
+            const headers = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].headers;
+            expect(headers['Authorization']).toBeUndefined();
+        });
+    });
+
     describe('HTTP methods', () => {
         it('should make GET request', async () => {
             const mockData = { data: { id: 1, name: 'Test' } };
