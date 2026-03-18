@@ -21,6 +21,12 @@ export type {
     IngredienteSearchOptions,
 } from './types/prescricao.types';
 
+export type {
+    ProtocoloCreateInput,
+    ProtocoloAttributes,
+    ProtocoloMedicamento,
+} from './types/protocolo.types';
+
 // ============================================
 // ERRORS
 // ============================================

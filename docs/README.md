@@ -20,6 +20,9 @@
   - [Link Digital](#link-digital)
   - [URL do PDF](#url-do-pdf)
   - [Buscar Princípios Ativos](#buscar-princípios-ativos)
+- [Protocolo (Templates de Prescrição)](#protocolo-templates-de-prescrição)
+  - [Por Prescritor](#por-prescritor)
+  - [Por Parceiro (Instituição)](#por-parceiro-instituição)
 - [Tratamento de Erros](#tratamento-de-erros)
 - [Desenvolvimento](#desenvolvimento)
 - [Contribuindo](#contribuindo)
@@ -324,6 +327,96 @@ console.log(ingredientes[0].slug);  // Slug do ingrediente
 
 ---
 
+## Protocolo (Templates de Prescrição)
+
+Protocolos são templates reutilizáveis de prescrição com medicamentos pré-definidos. A API tem dois escopos:
+
+- **Por prescritor**: protocolos individuais do profissional (usa token, resolvido automaticamente)
+- **Por parceiro**: protocolos institucionais compartilhados (usa api-key/secret-key)
+
+### Tipos de Item
+
+O array `medicamentos` aceita 3 tipos de item:
+
+| Tipo | `id` | Campos | Exemplo |
+|---|---|---|---|
+| **Medicamento** | obrigatório (ex: `a1046...`) | nome, posologia, quantidade, composicao, fabricante, etc | Dipirona 500mg |
+| **Exame** | obrigatório (ex: `e10`) | nome, posologia (opcional) | Hemograma |
+| **Texto livre** | **sem id** | nome, posologia (aceita HTML) | Atestado médico |
+
+> Itens sem `id` são tratados como texto livre na prescrição.
+> IDs devem corresponder ao ambiente (integração ou produção).
+
+### Por Prescritor
+
+```typescript
+// Criar protocolo com medicamento, exame e texto livre
+const protocolo = await memed.protocolo.create('seu-external-id', {
+  nome: 'Gripe comum',  // máximo 500 caracteres
+  medicamentos: [
+    // Medicamento
+    {
+      id: 'a1046503030027106379',
+      nome: 'Dipirona 500mg',
+      posologia: '1 comprimido de 6 em 6 horas',
+      quantidade: 20,
+    },
+    // Exame
+    {
+      id: 'e10',
+      nome: 'Hemograma',
+      posologia: 'Jejum de 8 a 10 horas',
+    },
+    // Texto livre (documento)
+    {
+      nome: 'Atestado',
+      posologia: '<p>ATESTADO<br>Paciente sob meus cuidados...</p>',
+    },
+  ],
+});
+
+// Listar protocolos do prescritor
+const protocolos = await memed.protocolo.list('seu-external-id');
+
+// Deletar protocolo
+await memed.protocolo.delete('seu-external-id', protocolo.id);
+
+// Criar múltiplos protocolos (nome máx 250 caracteres)
+const multiplo = await memed.protocolo.createMultiple('seu-external-id', {
+  nome: 'Infecção urinária',
+  medicamentos: [
+    { nome: 'Norfloxacino 400mg', posologia: '1 comprimido 12/12h por 7 dias' },
+  ],
+});
+```
+
+### Por Parceiro (Instituição)
+
+Protocolos institucionais compartilhados entre todos os prescritores do parceiro. Não precisam de prescritor.
+
+```typescript
+// Criar protocolo institucional (requer id do medicamento)
+const protocolo = await memed.protocolo.createForPartner({
+  nome: 'Protocolo institucional',
+  medicamentos: [
+    { id: '12345', nome: 'Medicamento A', posologia: '1x ao dia' },
+  ],
+});
+
+// Listar protocolos do parceiro
+const protocolos = await memed.protocolo.listForPartner();
+
+// Buscar protocolo específico
+const detalhe = await memed.protocolo.getForPartner(protocolo.id);
+
+// Deletar protocolo do parceiro
+await memed.protocolo.deleteForPartner(protocolo.id);
+```
+
+> **Importante:** O ID do medicamento deve ser do ambiente correspondente (integração ou produção).
+
+---
+
 ## Tratamento de Erros
 
 A biblioteca fornece a classe `MemedError` com métodos auxiliares para identificar tipos de erro.
@@ -461,11 +554,13 @@ memed-node/
 │   │   └── MemedClient.ts       # Cliente principal
 │   ├── resources/
 │   │   ├── Prescritor.ts        # API de prescritores
-│   │   └── Prescricao.ts        # API de prescrições
+│   │   ├── Prescricao.ts        # API de prescrições
+│   │   └── Protocolo.ts         # API de protocolos
 │   ├── types/
 │   │   ├── common.types.ts      # Tipos comuns
 │   │   ├── prescritor.types.ts  # Tipos de prescritor
-│   │   └── prescricao.types.ts  # Tipos de prescrição
+│   │   ├── prescricao.types.ts  # Tipos de prescrição
+│   │   └── protocolo.types.ts   # Tipos de protocolo
 │   ├── errors/
 │   │   └── MemedError.ts        # Classe de erro customizada
 │   └── index.ts                 # Exports públicos
