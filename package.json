@@ -1,6 +1,6 @@
 {
   "name": "memed-node",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Cliente Node.js não-oficial para a API da Memed",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
