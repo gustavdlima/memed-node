@@ -3,6 +3,7 @@ import { MemedConfig, Environment } from '../types/common.types';
 import { PrescritorResource } from '../resources/Prescritor';
 import { PrescricaoResource } from '../resources/Prescricao';
 import { ProtocoloResource } from '../resources/Protocolo';
+import { ImpressaoResource } from '../resources/Impressao';
 
 /**
  * Base URls for each environment
@@ -22,9 +23,7 @@ export class MemedClient {
     public readonly prescritor: PrescritorResource;
     public readonly prescricao: PrescricaoResource;
     public readonly protocolo: ProtocoloResource;
-
-    // TODO: Adicionar outros resources
-    // public readonly impressao: ImpressaoResource;
+    public readonly impressao: ImpressaoResource;
 
     constructor(config: MemedConfig) {
         this.validateConfig(config);
@@ -39,6 +38,7 @@ export class MemedClient {
         this.prescritor = new PrescritorResource(this.httpClient);
         this.prescricao = new PrescricaoResource(this.httpClient);
         this.protocolo = new ProtocoloResource(this.httpClient);
+        this.impressao = new ImpressaoResource(this.httpClient);
     }
 
     private validateConfig(config: MemedConfig): void {

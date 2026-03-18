@@ -109,6 +109,27 @@ describe('HttpClient', () => {
             );
         });
 
+        it('should send FormData without Content-Type header on postFormData', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            const formData: FormData = new FormData();
+            formData.append('file', new Blob(['content']), 'test.pdf');
+
+            await client.postFormData('/upload', formData);
+
+            const options = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1];
+
+            // Must NOT set Content-Type — fetch sets multipart/form-data with boundary automatically
+            expect(options.headers['Content-Type']).toBeUndefined();
+
+            // Body must be the FormData instance, not JSON stringified
+            expect(options.body).toBe(formData);
+            expect(options.method).toBe('POST');
+        });
+
         it('should make POST request with body', async () => {
             const mockData = { data: { id: 1 } };
             const body = { name: 'New User' };

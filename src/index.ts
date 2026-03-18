@@ -27,6 +27,11 @@ export type {
     ProtocoloMedicamento,
 } from './types/protocolo.types';
 
+export type {
+    ImpressaoAttributes,
+    ImpressaoConfigInput,
+} from './types/impressao.types';
+
 // ============================================
 // ERRORS
 // ============================================

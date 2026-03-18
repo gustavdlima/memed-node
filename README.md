@@ -79,6 +79,7 @@ Incluindo:
 - [API de Prescritores - CRUD completo](./docs/README.md#prescritor-profissionais-de-saúde)
 - [API de Prescrições - Histórico e documentos](./docs/README.md#prescrição-receitas-médicas)
 - [API de Protocolos - Templates de prescrição](./docs/README.md#protocolo-templates-de-prescrição)
+- [API de Impressão - Configuração de layout](./docs/README.md#impressão-configuração-de-layout)
 - [Tratamento de erros](./docs/README.md#tratamento-de-erros)
 - [Guia de desenvolvimento](./docs/README.md#desenvolvimento)
 - [Como contribuir](./docs/README.md#contribuindo)
@@ -90,6 +91,7 @@ Incluindo:
 - [x] **Prescritor** - CRUD completo para profissionais de saúde
 - [x] **Prescrição** - Histórico, link digital, PDF e busca de ingredientes
 - [x] **Protocolo** - Templates de prescrição (por prescritor e por instituição)
+- [x] **Impressão** - Configuração de layout, margens, cabeçalho/rodapé e upload de template PDF
 - [x] Suporte a múltiplos conselhos (CRM, CRO, COREN, etc)
 - [x] Resolução automática de token do prescritor
 - [x] Tratamento de erros customizado
@@ -97,8 +99,6 @@ Incluindo:
 - [x] Ambientes (integration/production)
 
 ### Em Desenvolvimento
-
-- [ ] **Impressão** - Configurações de layout
 - [ ] Validações (CPF, datas, etc)
 - [ ] Retry automático em erros 5xx
 - [ ] Cache de tokens

@@ -24,6 +24,10 @@
 - [Protocolo (Templates de Prescrição)](#protocolo-templates-de-prescrição)
   - [Por Prescritor](#por-prescritor)
   - [Por Parceiro (Instituição)](#por-parceiro-instituição)
+- [Impressão (Configuração de Layout)](#impressão-configuração-de-layout)
+  - [Configurar Impressão](#configurar-impressão)
+  - [Recuperar Configurações](#recuperar-configurações)
+  - [Upload de Template PDF](#upload-de-template-pdf)
 - [Tratamento de Erros](#tratamento-de-erros)
 - [Desenvolvimento](#desenvolvimento)
 - [Contribuindo](#contribuindo)
@@ -430,6 +434,101 @@ await memed.protocolo.deleteForPartner(protocolo.id);
 
 ---
 
+## Impressão (Configuração de Layout)
+
+Quando um prescritor é criado, a Memed adiciona 4 temas padrão (índices 1-4). Esses temas podem ser customizados via API.
+
+### Configurar Impressão
+
+Personaliza margens, fontes, cabeçalho, rodapé e opções de controle especial.
+
+```typescript
+await memed.impressao.configure('seu-external-id', {
+  medicos_id: 123456,
+  indice: 1,
+
+  // Fonte
+  fonte: 'Helvetica',
+  tamanho_fonte: 14,
+
+  // Margens (cm)
+  margem_esquerda: 1.5,
+  margem_direita: 1.5,
+  margem_superior: 1,
+  margem_inferior: 1,
+
+  // Papel (cm)
+  largura_papel: 21,
+  altura_papel: 29.7,
+
+  // Cabeçalho
+  titulo: 'Dr. José Silva',
+  titulo_fonte: 'Droid Serif Italic',
+  titulo_tamanho_fonte: 22,
+  titulo_cor: '#20afd6',
+  subtitulo: 'CRM: 12345SP - Clínica Geral',
+  subtitulo_cor: '#8c8c8c',
+
+  // Rodapé
+  rodape: 'Rua Exemplo, 100 - São Paulo/SP',
+  rodape_cor: '#8c8c8c',
+
+  // Dados do prescritor no layout
+  nome_medico: 'José Silva',
+  endereco_medico: 'Rua Exemplo, 100',
+  cidade_medico: 'São Paulo - SP',
+  telefone_medico: '(11) 99999-9999',
+
+  // Controle especial
+  imprimir_controle_especial: false,
+  imprimir_controle_especial_antibioticos: true,
+
+  // Cabeçalho/rodapé visíveis
+  mostrar_cabecalho_rodape_simples: 1,
+  mostrar_cabecalho_rodape_especial: 1,
+});
+```
+
+### Recuperar Configurações
+
+Retorna as configurações de impressão atuais (até 4 temas).
+
+```typescript
+const configs = await memed.impressao.get('seu-external-id');
+
+configs.forEach(config => {
+  console.log(`Tema ${config.indice}: ${config.fonte} ${config.tamanho_fonte}pt`);
+});
+```
+
+### Upload de Template PDF
+
+Importa cabeçalho/rodapé de um PDF. A Memed converte para imagem e detecta automaticamente os limites do cabeçalho/rodapé.
+
+```typescript
+import { readFile } from 'fs/promises';
+
+const pdfBuffer = await readFile('./receituario.pdf');
+const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+const { headerImage, footerImage } = await memed.impressao.uploadTemplate(
+  'seu-external-id',
+  pdfBlob,
+  'receituario.pdf'
+);
+
+console.log('Header:', headerImage);
+console.log('Footer:', footerImage);
+```
+
+> **Importante:**
+> - O template é aplicado à configuração de índice 1
+> - `mostrar_cabecalho_rodape_simples` e `mostrar_cabecalho_rodape_especial` devem ser `1` para as imagens aparecerem
+> - O processo precisa ser feito uma única vez por prescritor
+> - Verifique se `tamanho_cabecalho` e `tamanho_rodape` têm espaço suficiente para as imagens
+
+---
+
 ## Tratamento de Erros
 
 A biblioteca fornece a classe `MemedError` com métodos auxiliares para identificar tipos de erro.
@@ -568,12 +667,14 @@ memed-node/
 │   ├── resources/
 │   │   ├── Prescritor.ts        # API de prescritores
 │   │   ├── Prescricao.ts        # API de prescrições
-│   │   └── Protocolo.ts         # API de protocolos
+│   │   ├── Protocolo.ts         # API de protocolos
+│   │   └── Impressao.ts         # API de impressão
 │   ├── types/
 │   │   ├── common.types.ts      # Tipos comuns
 │   │   ├── prescritor.types.ts  # Tipos de prescritor
 │   │   ├── prescricao.types.ts  # Tipos de prescrição
-│   │   └── protocolo.types.ts   # Tipos de protocolo
+│   │   ├── protocolo.types.ts   # Tipos de protocolo
+│   │   └── impressao.types.ts   # Tipos de impressão
 │   ├── errors/
 │   │   └── MemedError.ts        # Classe de erro customizada
 │   └── index.ts                 # Exports públicos

@@ -169,4 +169,57 @@ export class HttpClient {
     async delete<T>(path: string, params?: Record<string, string | number | boolean>): Promise<T> {
         return this.request<T>('DELETE', path, undefined, params);
     }
+
+    /**
+     * POST with multipart/form-data (for file uploads)
+     *
+     * Content-Type is set automatically by fetch when using FormData.
+     */
+    async postFormData<T>(
+        path: string,
+        formData: FormData,
+        params?: Record<string, string | number | boolean>
+    ): Promise<T> {
+        const url: string = this.buildUrl(path, params);
+
+        try {
+            const controller: AbortController = new AbortController();
+            const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => controller.abort(), this.timeout);
+
+            const response: Response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/vnd.api+json',
+                },
+                body: formData,
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                await this.handleErrorResponse(response);
+            }
+
+            return (await response.json()) as T;
+        } catch (error: unknown) {
+            if (error instanceof MemedError) {
+                throw error;
+            }
+
+            if (error instanceof Error && error.name === 'AbortError') {
+                throw new MemedError(
+                    `Timeout: requisição excedeu ${this.timeout}ms`,
+                    undefined,
+                    error
+                );
+            }
+
+            throw new MemedError(
+                'Erro de conexão com a API da Memed',
+                undefined,
+                error
+            );
+        }
+    }
 }
