@@ -80,6 +80,7 @@ Incluindo:
 - [API de Prescrições - Histórico e documentos](./docs/README.md#prescrição-receitas-médicas)
 - [API de Protocolos - Templates de prescrição](./docs/README.md#protocolo-templates-de-prescrição)
 - [API de Impressão - Configuração de layout](./docs/README.md#impressão-configuração-de-layout)
+- [Especialidades e Cidades](./docs/README.md#especialidades-e-cidades)
 - [Tratamento de erros](./docs/README.md#tratamento-de-erros)
 - [Guia de desenvolvimento](./docs/README.md#desenvolvimento)
 - [Como contribuir](./docs/README.md#contribuindo)
@@ -92,6 +93,8 @@ Incluindo:
 - [x] **Prescrição** - Histórico, link digital, PDF e busca de ingredientes
 - [x] **Protocolo** - Templates de prescrição (por prescritor e por instituição)
 - [x] **Impressão** - Configuração de layout, margens, cabeçalho/rodapé e upload de template PDF
+- [x] **Especialidades** - Consulta de especialidades médicas
+- [x] **Cidades** - Consulta de cidades brasileiras
 - [x] Suporte a múltiplos conselhos (CRM, CRO, COREN, etc)
 - [x] Resolução automática de token do prescritor
 - [x] Tratamento de erros customizado

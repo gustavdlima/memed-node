@@ -28,6 +28,9 @@
   - [Configurar Impressão](#configurar-impressão)
   - [Recuperar Configurações](#recuperar-configurações)
   - [Upload de Template PDF](#upload-de-template-pdf)
+- [Especialidades e Cidades](#especialidades-e-cidades)
+  - [Especialidades](#especialidades)
+  - [Cidades](#cidades)
 - [Tratamento de Erros](#tratamento-de-erros)
 - [Desenvolvimento](#desenvolvimento)
 - [Contribuindo](#contribuindo)
@@ -529,6 +532,48 @@ console.log('Footer:', footerImage);
 
 ---
 
+## Especialidades e Cidades
+
+Endpoints públicos (não precisam de autenticação) para consultar especialidades médicas e cidades. Usados para obter os IDs necessários no cadastro de prescritores.
+
+> **Dica:** Consulte essas APIs previamente e armazene os IDs mais utilizados em cache no seu sistema.
+
+### Especialidades
+
+```typescript
+// Listar todas
+const especialidades = await memed.especialidade.list();
+
+// Filtrar por nome
+const generalistas = await memed.especialidade.list({ q: 'Generalista' });
+
+console.log(generalistas[0].id);    // ID para usar no cadastro
+console.log(generalistas[0].nome);  // "Clínica Geral / Generalista"
+console.log(generalistas[0].grupo); // Grupo/categoria
+```
+
+### Cidades
+
+```typescript
+// Listar todas
+const cidades = await memed.cidade.list();
+
+// Filtrar por nome
+const campinas = await memed.cidade.list({ q: 'Campinas' });
+
+// Filtrar por estado
+const cidadesRJ = await memed.cidade.list({ uf: 'RJ' });
+
+// Combinar filtros
+const niteroi = await memed.cidade.list({ q: 'Niterói', uf: 'RJ' });
+
+console.log(niteroi[0].id);   // ID para usar no cadastro
+console.log(niteroi[0].nome); // "Niterói"
+console.log(niteroi[0].uf);   // "RJ"
+```
+
+---
+
 ## Tratamento de Erros
 
 A biblioteca fornece a classe `MemedError` com métodos auxiliares para identificar tipos de erro.
@@ -668,13 +713,17 @@ memed-node/
 │   │   ├── Prescritor.ts        # API de prescritores
 │   │   ├── Prescricao.ts        # API de prescrições
 │   │   ├── Protocolo.ts         # API de protocolos
-│   │   └── Impressao.ts         # API de impressão
+│   │   ├── Impressao.ts         # API de impressão
+│   │   ├── Especialidade.ts     # API de especialidades
+│   │   └── Cidade.ts            # API de cidades
 │   ├── types/
 │   │   ├── common.types.ts      # Tipos comuns
 │   │   ├── prescritor.types.ts  # Tipos de prescritor
 │   │   ├── prescricao.types.ts  # Tipos de prescrição
 │   │   ├── protocolo.types.ts   # Tipos de protocolo
-│   │   └── impressao.types.ts   # Tipos de impressão
+│   │   ├── impressao.types.ts   # Tipos de impressão
+│   │   ├── especialidade.types.ts # Tipos de especialidade
+│   │   └── cidade.types.ts      # Tipos de cidade
 │   ├── errors/
 │   │   └── MemedError.ts        # Classe de erro customizada
 │   └── index.ts                 # Exports públicos

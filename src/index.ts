@@ -32,6 +32,16 @@ export type {
     ImpressaoConfigInput,
 } from './types/impressao.types';
 
+export type {
+    EspecialidadeAttributes,
+    EspecialidadeFilterOptions,
+} from './types/especialidade.types';
+
+export type {
+    CidadeAttributes,
+    CidadeFilterOptions,
+} from './types/cidade.types';
+
 // ============================================
 // ERRORS
 // ============================================
