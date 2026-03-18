@@ -1,6 +1,11 @@
 import { HttpClient } from './HttpClient';
 import { MemedConfig, Environment } from '../types/common.types';
 import { PrescritorResource } from '../resources/Prescritor';
+import { PrescricaoResource } from '../resources/Prescricao';
+import { ProtocoloResource } from '../resources/Protocolo';
+import { ImpressaoResource } from '../resources/Impressao';
+import { EspecialidadeResource } from '../resources/Especialidade';
+import { CidadeResource } from '../resources/Cidade';
 
 /**
  * Base URls for each environment
@@ -18,11 +23,11 @@ export class MemedClient {
     private readonly httpClient: HttpClient;
 
     public readonly prescritor: PrescritorResource;
-
-    // TODO: Adicionar outros resources
-    // public readonly prescricao: PrescricaoResource;
-    // public readonly protocolo: ProtocoloResource;
-    // public readonly impressao: ImpressaoResource;
+    public readonly prescricao: PrescricaoResource;
+    public readonly protocolo: ProtocoloResource;
+    public readonly impressao: ImpressaoResource;
+    public readonly especialidade: EspecialidadeResource;
+    public readonly cidade: CidadeResource;
 
     constructor(config: MemedConfig) {
         this.validateConfig(config);
@@ -35,6 +40,11 @@ export class MemedClient {
         const baseUrl: string = BASE_URLS[environment];
         this.httpClient = new HttpClient(baseUrl, apiKey, secretKey, timeout);
         this.prescritor = new PrescritorResource(this.httpClient);
+        this.prescricao = new PrescricaoResource(this.httpClient);
+        this.protocolo = new ProtocoloResource(this.httpClient);
+        this.impressao = new ImpressaoResource(this.httpClient);
+        this.especialidade = new EspecialidadeResource(this.httpClient);
+        this.cidade = new CidadeResource(this.httpClient);
     }
 
     private validateConfig(config: MemedConfig): void {

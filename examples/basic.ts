@@ -81,6 +81,49 @@ async function main() {
         );
         console.log('✅ Email atualizado:', medicoAtualizado.email);
 
+        // === Prescrições ===
+        console.log('\n--- Prescrições ---');
+
+        // Listar prescrições do médico
+        console.log('\n📋 Listando prescrições...');
+        const prescricoes = await memed.prescricao.list({
+            prescritorId: medico.external_id,
+            limit: 10,
+        });
+        console.log(`✅ ${prescricoes.length} prescrições encontradas`);
+
+        // Buscar princípios ativos (não precisa de prescritor)
+        console.log('\n🔬 Buscando princípios ativos...');
+        const ingredientes = await memed.prescricao.searchIngredients({
+            terms: 'dipirona',
+            limit: 5,
+        });
+        console.log(`✅ ${ingredientes.length} ingredientes encontrados`);
+        ingredientes.forEach(i => console.log(`   - ${i.nome} (${i.slug})`));
+
+        // === Protocolos ===
+        console.log('\n--- Protocolos ---');
+
+        // Criar protocolo para o médico
+        console.log('\n📝 Criando protocolo...');
+        const protocolo = await memed.protocolo.create(medico.external_id, {
+            nome: 'Gripe comum',
+            medicamentos: [
+                { nome: 'Dipirona 500mg', posologia: '1 comprimido 6/6h', quantidade: 20 },
+            ],
+        });
+        console.log(`✅ Protocolo criado: ${protocolo.nome} (id: ${protocolo.id})`);
+
+        // Listar protocolos do médico
+        console.log('\n📋 Listando protocolos...');
+        const protocolos = await memed.protocolo.list(medico.external_id);
+        console.log(`✅ ${protocolos.length} protocolos encontrados`);
+
+        // Deletar protocolo
+        console.log('\n🗑️  Deletando protocolo...');
+        await memed.protocolo.delete(medico.external_id, protocolo.id);
+        console.log('✅ Protocolo deletado');
+
         // Deletar prescritores
         console.log('\n🗑️  Deletando prescritores de teste...');
         await memed.prescritor.delete(medico.external_id);

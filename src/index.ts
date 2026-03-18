@@ -12,6 +12,36 @@ export type {
     ProfessionalBoard
 } from './types/prescritor.types';
 
+export type {
+    PrescricaoListOptions,
+    PrescricaoAttributes,
+    PrescricaoMedicamento,
+    PrescricaoPaciente,
+    Ingrediente,
+    IngredienteSearchOptions,
+} from './types/prescricao.types';
+
+export type {
+    ProtocoloCreateInput,
+    ProtocoloAttributes,
+    ProtocoloMedicamento,
+} from './types/protocolo.types';
+
+export type {
+    ImpressaoAttributes,
+    ImpressaoConfigInput,
+} from './types/impressao.types';
+
+export type {
+    EspecialidadeAttributes,
+    EspecialidadeFilterOptions,
+} from './types/especialidade.types';
+
+export type {
+    CidadeAttributes,
+    CidadeFilterOptions,
+} from './types/cidade.types';
+
 // ============================================
 // ERRORS
 // ============================================

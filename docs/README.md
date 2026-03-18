@@ -14,6 +14,23 @@
   - [Atualizar Prescritor](#atualizar-prescritor)
   - [Deletar Prescritor](#deletar-prescritor)
   - [Tipos de Conselho Suportados](#tipos-de-conselho-suportados)
+- [Prescrição (Receitas Médicas)](#prescrição-receitas-médicas)
+  - [Buscar Prescrição por ID](#buscar-prescrição-por-id)
+  - [Listar Prescrições](#listar-prescrições)
+  - [Deletar Prescrição](#deletar-prescrição)
+  - [Link Digital](#link-digital)
+  - [URL do PDF](#url-do-pdf)
+  - [Buscar Princípios Ativos](#buscar-princípios-ativos)
+- [Protocolo (Templates de Prescrição)](#protocolo-templates-de-prescrição)
+  - [Por Prescritor](#por-prescritor)
+  - [Por Parceiro (Instituição)](#por-parceiro-instituição)
+- [Impressão (Configuração de Layout)](#impressão-configuração-de-layout)
+  - [Configurar Impressão](#configurar-impressão)
+  - [Recuperar Configurações](#recuperar-configurações)
+  - [Upload de Template PDF](#upload-de-template-pdf)
+- [Especialidades e Cidades](#especialidades-e-cidades)
+  - [Especialidades](#especialidades)
+  - [Cidades](#cidades)
 - [Tratamento de Erros](#tratamento-de-erros)
 - [Desenvolvimento](#desenvolvimento)
 - [Contribuindo](#contribuindo)
@@ -225,6 +242,338 @@ const enfermeiro = await memed.prescritor.create({
 
 ---
 
+## Prescrição (Receitas Médicas)
+
+A API de prescrições permite consultar o histórico de receitas, obter links digitais e PDFs. A criação de prescrições é feita pelo módulo frontend da Memed (widget/iframe).
+
+> **Token automático:** Todos os métodos que precisam do token do prescritor o resolvem automaticamente via `GET /sinapse-prescricao/usuarios/{id}`, já que o token da Memed não é estático.
+
+### Buscar Prescrição por ID
+
+Busca uma prescrição específica com documentos estruturados. Usa `Authorization: Bearer` como a API da Memed exige.
+
+```typescript
+// Com documentos estruturados (padrão)
+const prescricao = await memed.prescricao.get('seu-external-id', 42);
+
+// Sem documentos estruturados
+const prescricao = await memed.prescricao.get('seu-external-id', 42, false);
+```
+
+### Listar Prescrições
+
+Lista o histórico de prescrições de um prescritor. Retorna as últimas 10 por padrão.
+
+```typescript
+// Listagem simples
+const prescricoes = await memed.prescricao.list({
+  prescritorId: 'seu-external-id',
+});
+
+// Com filtros e paginação
+const prescricoes = await memed.prescricao.list({
+  prescritorId: 'seu-external-id',
+  limit: 50,
+  offset: 0,
+  initialDate: '2026-01-01',  // YYYY-MM-DD
+  finalDate: '2026-03-01',
+  structuredDocuments: true,
+});
+```
+
+#### Opções de Filtro
+
+| Propriedade | Tipo | Obrigatório | Observações |
+|---|---|---|---|
+| `prescritorId` | string | Sim | CPF, external_id ou registro+UF |
+| `limit` | number | | Máximo 100 |
+| `offset` | number | | Para paginação |
+| `initialDate` | string | | Formato YYYY-MM-DD |
+| `finalDate` | string | | Formato YYYY-MM-DD |
+| `structuredDocuments` | boolean | | Incluir documentos estruturados |
+
+### Deletar Prescrição
+
+Remove uma prescrição pelo ID.
+
+```typescript
+await memed.prescricao.delete('seu-external-id', 42);
+```
+
+### Link Digital
+
+Obtém o link digital compartilhável de uma prescrição e o código de desbloqueio.
+
+```typescript
+const { link, codigoDesbloqueio } = await memed.prescricao.getDigitalLink(
+  'seu-external-id',
+  42
+);
+
+console.log('Link:', link);
+console.log('Código:', codigoDesbloqueio);
+```
+
+### URL do PDF
+
+Obtém a URL para download do PDF de uma prescrição.
+
+```typescript
+const pdfUrl = await memed.prescricao.getPdfUrl('seu-external-id', 42);
+console.log('PDF:', pdfUrl);
+```
+
+### Buscar Princípios Ativos
+
+Busca princípios ativos (ingredientes) na base da Memed. Este método usa autenticação via api-key/secret-key, não precisa de prescritor.
+
+```typescript
+// Busca simples
+const ingredientes = await memed.prescricao.searchIngredients({
+  terms: 'dipirona',
+});
+
+// Com opções
+const ingredientes = await memed.prescricao.searchIngredients({
+  terms: 'paracetamol',
+  limit: 10,
+  orderField: 'nome',
+  orderSort: 'ASC',
+});
+
+console.log(ingredientes[0].nome);  // Nome do ingrediente
+console.log(ingredientes[0].slug);  // Slug do ingrediente
+```
+
+---
+
+## Protocolo (Templates de Prescrição)
+
+Protocolos são templates reutilizáveis de prescrição com medicamentos pré-definidos. A API tem dois escopos:
+
+- **Por prescritor**: protocolos individuais do profissional (usa token, resolvido automaticamente)
+- **Por parceiro**: protocolos institucionais compartilhados (usa api-key/secret-key)
+
+### Tipos de Item
+
+O array `medicamentos` aceita 3 tipos de item:
+
+| Tipo | `id` | Campos | Exemplo |
+|---|---|---|---|
+| **Medicamento** | obrigatório (ex: `a1046...`) | nome, posologia, quantidade, composicao, fabricante, etc | Dipirona 500mg |
+| **Exame** | obrigatório (ex: `e10`) | nome, posologia (opcional) | Hemograma |
+| **Texto livre** | **sem id** | nome, posologia (aceita HTML) | Atestado médico |
+
+> Itens sem `id` são tratados como texto livre na prescrição.
+> IDs devem corresponder ao ambiente (integração ou produção).
+
+### Por Prescritor
+
+```typescript
+// Criar protocolo com medicamento, exame e texto livre
+const protocolo = await memed.protocolo.create('seu-external-id', {
+  nome: 'Gripe comum',  // máximo 500 caracteres
+  medicamentos: [
+    // Medicamento
+    {
+      id: 'a1046503030027106379',
+      nome: 'Dipirona 500mg',
+      posologia: '1 comprimido de 6 em 6 horas',
+      quantidade: 20,
+    },
+    // Exame
+    {
+      id: 'e10',
+      nome: 'Hemograma',
+      posologia: 'Jejum de 8 a 10 horas',
+    },
+    // Texto livre (documento)
+    {
+      nome: 'Atestado',
+      posologia: '<p>ATESTADO<br>Paciente sob meus cuidados...</p>',
+    },
+  ],
+});
+
+// Listar protocolos do prescritor
+const protocolos = await memed.protocolo.list('seu-external-id');
+
+// Deletar protocolo
+await memed.protocolo.delete('seu-external-id', protocolo.id);
+
+// Criar múltiplos protocolos (nome máx 250 caracteres)
+const multiplo = await memed.protocolo.createMultiple('seu-external-id', {
+  nome: 'Infecção urinária',
+  medicamentos: [
+    { nome: 'Norfloxacino 400mg', posologia: '1 comprimido 12/12h por 7 dias' },
+  ],
+});
+```
+
+### Por Parceiro (Instituição)
+
+Protocolos institucionais compartilhados entre todos os prescritores do parceiro. Não precisam de prescritor.
+
+```typescript
+// Criar protocolo institucional (requer id do medicamento)
+const protocolo = await memed.protocolo.createForPartner({
+  nome: 'Protocolo institucional',
+  medicamentos: [
+    { id: '12345', nome: 'Medicamento A', posologia: '1x ao dia' },
+  ],
+});
+
+// Listar protocolos do parceiro
+const protocolos = await memed.protocolo.listForPartner();
+
+// Buscar protocolo específico
+const detalhe = await memed.protocolo.getForPartner(protocolo.id);
+
+// Deletar protocolo do parceiro
+await memed.protocolo.deleteForPartner(protocolo.id);
+```
+
+> **Importante:** O ID do medicamento deve ser do ambiente correspondente (integração ou produção).
+
+---
+
+## Impressão (Configuração de Layout)
+
+Quando um prescritor é criado, a Memed adiciona 4 temas padrão (índices 1-4). Esses temas podem ser customizados via API.
+
+### Configurar Impressão
+
+Personaliza margens, fontes, cabeçalho, rodapé e opções de controle especial.
+
+```typescript
+await memed.impressao.configure('seu-external-id', {
+  medicos_id: 123456,
+  indice: 1,
+
+  // Fonte
+  fonte: 'Helvetica',
+  tamanho_fonte: 14,
+
+  // Margens (cm)
+  margem_esquerda: 1.5,
+  margem_direita: 1.5,
+  margem_superior: 1,
+  margem_inferior: 1,
+
+  // Papel (cm)
+  largura_papel: 21,
+  altura_papel: 29.7,
+
+  // Cabeçalho
+  titulo: 'Dr. José Silva',
+  titulo_fonte: 'Droid Serif Italic',
+  titulo_tamanho_fonte: 22,
+  titulo_cor: '#20afd6',
+  subtitulo: 'CRM: 12345SP - Clínica Geral',
+  subtitulo_cor: '#8c8c8c',
+
+  // Rodapé
+  rodape: 'Rua Exemplo, 100 - São Paulo/SP',
+  rodape_cor: '#8c8c8c',
+
+  // Dados do prescritor no layout
+  nome_medico: 'José Silva',
+  endereco_medico: 'Rua Exemplo, 100',
+  cidade_medico: 'São Paulo - SP',
+  telefone_medico: '(11) 99999-9999',
+
+  // Controle especial
+  imprimir_controle_especial: false,
+  imprimir_controle_especial_antibioticos: true,
+
+  // Cabeçalho/rodapé visíveis
+  mostrar_cabecalho_rodape_simples: 1,
+  mostrar_cabecalho_rodape_especial: 1,
+});
+```
+
+### Recuperar Configurações
+
+Retorna as configurações de impressão atuais (até 4 temas).
+
+```typescript
+const configs = await memed.impressao.get('seu-external-id');
+
+configs.forEach(config => {
+  console.log(`Tema ${config.indice}: ${config.fonte} ${config.tamanho_fonte}pt`);
+});
+```
+
+### Upload de Template PDF
+
+Importa cabeçalho/rodapé de um PDF. A Memed converte para imagem e detecta automaticamente os limites do cabeçalho/rodapé.
+
+```typescript
+import { readFile } from 'fs/promises';
+
+const pdfBuffer = await readFile('./receituario.pdf');
+const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+const { headerImage, footerImage } = await memed.impressao.uploadTemplate(
+  'seu-external-id',
+  pdfBlob,
+  'receituario.pdf'
+);
+
+console.log('Header:', headerImage);
+console.log('Footer:', footerImage);
+```
+
+> **Importante:**
+> - O template é aplicado à configuração de índice 1
+> - `mostrar_cabecalho_rodape_simples` e `mostrar_cabecalho_rodape_especial` devem ser `1` para as imagens aparecerem
+> - O processo precisa ser feito uma única vez por prescritor
+> - Verifique se `tamanho_cabecalho` e `tamanho_rodape` têm espaço suficiente para as imagens
+
+---
+
+## Especialidades e Cidades
+
+Endpoints públicos (não precisam de autenticação) para consultar especialidades médicas e cidades. Usados para obter os IDs necessários no cadastro de prescritores.
+
+> **Dica:** Consulte essas APIs previamente e armazene os IDs mais utilizados em cache no seu sistema.
+
+### Especialidades
+
+```typescript
+// Listar todas
+const especialidades = await memed.especialidade.list();
+
+// Filtrar por nome
+const generalistas = await memed.especialidade.list({ q: 'Generalista' });
+
+console.log(generalistas[0].id);    // ID para usar no cadastro
+console.log(generalistas[0].nome);  // "Clínica Geral / Generalista"
+console.log(generalistas[0].grupo); // Grupo/categoria
+```
+
+### Cidades
+
+```typescript
+// Listar todas
+const cidades = await memed.cidade.list();
+
+// Filtrar por nome
+const campinas = await memed.cidade.list({ q: 'Campinas' });
+
+// Filtrar por estado
+const cidadesRJ = await memed.cidade.list({ uf: 'RJ' });
+
+// Combinar filtros
+const niteroi = await memed.cidade.list({ q: 'Niterói', uf: 'RJ' });
+
+console.log(niteroi[0].id);   // ID para usar no cadastro
+console.log(niteroi[0].nome); // "Niterói"
+console.log(niteroi[0].uf);   // "RJ"
+```
+
+---
+
 ## Tratamento de Erros
 
 A biblioteca fornece a classe `MemedError` com métodos auxiliares para identificar tipos de erro.
@@ -361,10 +710,20 @@ memed-node/
 │   │   ├── HttpClient.ts        # Cliente HTTP base
 │   │   └── MemedClient.ts       # Cliente principal
 │   ├── resources/
-│   │   └── PrescritorResource.ts # API de prescritores
+│   │   ├── Prescritor.ts        # API de prescritores
+│   │   ├── Prescricao.ts        # API de prescrições
+│   │   ├── Protocolo.ts         # API de protocolos
+│   │   ├── Impressao.ts         # API de impressão
+│   │   ├── Especialidade.ts     # API de especialidades
+│   │   └── Cidade.ts            # API de cidades
 │   ├── types/
 │   │   ├── common.types.ts      # Tipos comuns
-│   │   └── prescritor.types.ts  # Tipos de prescritor
+│   │   ├── prescritor.types.ts  # Tipos de prescritor
+│   │   ├── prescricao.types.ts  # Tipos de prescrição
+│   │   ├── protocolo.types.ts   # Tipos de protocolo
+│   │   ├── impressao.types.ts   # Tipos de impressão
+│   │   ├── especialidade.types.ts # Tipos de especialidade
+│   │   └── cidade.types.ts      # Tipos de cidade
 │   ├── errors/
 │   │   └── MemedError.ts        # Classe de erro customizada
 │   └── index.ts                 # Exports públicos

@@ -17,7 +17,7 @@ export class HttpClient {
         return this._baseUrl;
     }
 
-    private buildUrl(path: string, params?: Record<string, unknown>): string {
+    private buildUrl(path: string, params?: Record<string, string | number | boolean>): string {
         const cleanPath: string = path.startsWith("/") ? path.slice(1) : path;
         const url: URL = new URL(cleanPath, this._baseUrl);
 
@@ -25,7 +25,7 @@ export class HttpClient {
         url.searchParams.append('secret-key', this.secretKey);
 
         if (params) {
-            Object.entries(params).forEach(([key, value]: [string, unknown]): void => {
+            Object.entries(params).forEach(([key, value]: [string, string | number | boolean]): void => {
                 if (value !== undefined && value !== null) {
                     url.searchParams.append(key, String(value));
                 }
@@ -42,7 +42,8 @@ export class HttpClient {
         method: string,
         path: string,
         body?: unknown,
-        params?: Record<string, unknown>,
+        params?: Record<string, string | number | boolean>,
+        bearerToken?: string,
     ): Promise<T> {
         const url: string = this.buildUrl(path, params);
 
@@ -50,12 +51,18 @@ export class HttpClient {
             const controller: AbortController = new AbortController();
             const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => controller.abort(), this.timeout);
 
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                Accept: 'application/vnd.api+json',
+            };
+
+            if (bearerToken) {
+                headers['Authorization'] = `Bearer ${bearerToken}`;
+            }
+
             const response: Response = await fetch(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/vnd.api+json',
-                },
+                headers,
                 body: body ? JSON.stringify(body) : undefined,
                 signal: controller.signal,
             });
@@ -135,14 +142,18 @@ export class HttpClient {
         }
     }
 
-    async get<T>(path: string, params?: Record<string, unknown>): Promise<T> {
-        return this.request<T>('GET', path, undefined, params);
+    async get<T>(
+        path: string,
+        params?: Record<string, string | number | boolean>,
+        bearerToken?: string
+    ): Promise<T> {
+        return this.request<T>('GET', path, undefined, params, bearerToken);
     }
 
     async post<T>(
         path: string,
         body: unknown,
-        params?: Record<string, unknown>
+        params?: Record<string, string | number | boolean>
     ): Promise<T> {
         return this.request<T>('POST', path, body, params);
     }
@@ -150,12 +161,65 @@ export class HttpClient {
     async patch<T>(
         path: string,
         body: unknown,
-        params?: Record<string, unknown>
+        params?: Record<string, string | number | boolean>
     ): Promise<T> {
         return this.request<T>('PATCH', path, body, params);
     }
 
-    async delete<T>(path: string, params?: Record<string, unknown>): Promise<T> {
+    async delete<T>(path: string, params?: Record<string, string | number | boolean>): Promise<T> {
         return this.request<T>('DELETE', path, undefined, params);
+    }
+
+    /**
+     * POST with multipart/form-data (for file uploads)
+     *
+     * Content-Type is set automatically by fetch when using FormData.
+     */
+    async postFormData<T>(
+        path: string,
+        formData: FormData,
+        params?: Record<string, string | number | boolean>
+    ): Promise<T> {
+        const url: string = this.buildUrl(path, params);
+
+        try {
+            const controller: AbortController = new AbortController();
+            const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => controller.abort(), this.timeout);
+
+            const response: Response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/vnd.api+json',
+                },
+                body: formData,
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                await this.handleErrorResponse(response);
+            }
+
+            return (await response.json()) as T;
+        } catch (error: unknown) {
+            if (error instanceof MemedError) {
+                throw error;
+            }
+
+            if (error instanceof Error && error.name === 'AbortError') {
+                throw new MemedError(
+                    `Timeout: requisição excedeu ${this.timeout}ms`,
+                    undefined,
+                    error
+                );
+            }
+
+            throw new MemedError(
+                'Erro de conexão com a API da Memed',
+                undefined,
+                error
+            );
+        }
     }
 }

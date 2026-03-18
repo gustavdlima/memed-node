@@ -66,6 +66,32 @@ describe('HttpClient', () => {
         });
     });
 
+    describe('Bearer token auth', () => {
+        it('should add Authorization Bearer header when bearerToken is provided', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            await client.get('/test', {}, 'my-jwt-token');
+
+            const headers = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].headers;
+            expect(headers['Authorization']).toBe('Bearer my-jwt-token');
+        });
+
+        it('should NOT add Authorization header when bearerToken is not provided', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            await client.get('/test');
+
+            const headers = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].headers;
+            expect(headers['Authorization']).toBeUndefined();
+        });
+    });
+
     describe('HTTP methods', () => {
         it('should make GET request', async () => {
             const mockData = { data: { id: 1, name: 'Test' } };
@@ -81,6 +107,27 @@ describe('HttpClient', () => {
                 expect.stringContaining('/users/1'),
                 expect.objectContaining({ method: 'GET' })
             );
+        });
+
+        it('should send FormData without Content-Type header on postFormData', async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: 'test' }),
+            });
+
+            const formData: FormData = new FormData();
+            formData.append('file', new Blob(['content']), 'test.pdf');
+
+            await client.postFormData('/upload', formData);
+
+            const options = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][1];
+
+            // Must NOT set Content-Type — fetch sets multipart/form-data with boundary automatically
+            expect(options.headers['Content-Type']).toBeUndefined();
+
+            // Body must be the FormData instance, not JSON stringified
+            expect(options.body).toBe(formData);
+            expect(options.method).toBe('POST');
         });
 
         it('should make POST request with body', async () => {
