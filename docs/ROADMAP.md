@@ -6,12 +6,12 @@
 
 ## Status Atual
 
-**Versão:** 0.0.1 (Beta)
-**Última atualização:** Fevereiro 2025
+**Versão:** 1.0.0
+**Última atualização:** Março 2026
 
 ---
 
-## Implementado (v0.1.0)
+## Implementado (v1.0.0)
 
 ### Core
 - [x] Cliente HTTP base com fetch nativo
@@ -20,6 +20,8 @@
 - [x] Exports ESM e CommonJS
 - [x] Configuração de ambientes (integration/production)
 - [x] Timeout configurável
+- [x] Suporte a Bearer token (Authorization header)
+- [x] Suporte a multipart/form-data (upload de arquivos)
 
 ### API - Prescritor
 - [x] Criar prescritor (`create`)
@@ -29,17 +31,40 @@
 - [x] Deletar prescritor (`delete`)
 - [x] Suporte a múltiplos conselhos (CRM, CRO, COREN, etc)
 
+### API - Prescrição
+- [x] Buscar prescrição por ID (`get`) com documentos estruturados
+- [x] Listar prescrições (`list`) com paginação e filtros de data
+- [x] Deletar prescrição (`delete`)
+- [x] Link digital da prescrição (`getDigitalLink`)
+- [x] URL do PDF da prescrição (`getPdfUrl`)
+- [x] Buscar princípios ativos (`searchIngredients`)
+- [x] Resolução automática de token do prescritor
+
+### API - Protocolo
+- [x] Criar protocolo por prescritor (`create`)
+- [x] Listar protocolos por prescritor (`list`)
+- [x] Deletar protocolo por prescritor (`delete`)
+- [x] Criar múltiplos protocolos (`createMultiple`)
+- [x] Criar protocolo institucional (`createForPartner`)
+- [x] Listar protocolos institucionais (`listForPartner`)
+- [x] Buscar protocolo institucional (`getForPartner`)
+- [x] Deletar protocolo institucional (`deleteForPartner`)
+- [x] Suporte a medicamentos, exames e texto livre
+
+### API - Impressão
+- [x] Configurar impressão (`configure`)
+- [x] Recuperar configurações (`get`)
+- [x] Upload de template PDF (`uploadTemplate`)
+
+### API - Especialidades e Cidades
+- [x] Listar especialidades com filtro (`especialidade.list`)
+- [x] Listar cidades com filtro por nome e UF (`cidade.list`)
+
 ### Tratamento de Erros
 - [x] Classe `MemedError` customizada
 - [x] Mensagens de erro em português
 - [x] Helpers para tipos de erro (`isAuthError`, `isValidationError`, etc)
 - [x] Serialização JSON de erros
-
-### Documentação
-- [x] README principal
-- [x] Documentação completa em `/docs`
-- [x] Exemplos de uso
-- [x] Guia de contribuição
 
 ### Qualidade de Código
 - [x] ESLint v9 configurado
@@ -49,114 +74,41 @@
 
 ---
 
-## Em Desenvolvimento
+## Planejado (Futuro)
 
-### v0.2.0 - API de Prescrição
-**Prioridade:** Alta
-**Previsão:** Q1 2025
-
-- [ ] Criar prescrição
-- [ ] Buscar prescrição
-- [ ] Listar prescrições
-- [ ] Atualizar prescrição
-- [ ] Deletar prescrição
-- [ ] Adicionar medicamentos
-- [ ] Adicionar exames
-- [ ] Imprimir prescrição
-
-**Tipos a adicionar:**
-```typescript
-interface PrescricaoCreateInput {
-  prescritor_external_id: string;
-  paciente: {
-    nome: string;
-    cpf?: string;
-    idade?: number;
-  };
-  medicamentos: Medicamento[];
-  observacoes?: string;
-}
-```
-
-### v0.3.0 - API de Pacientes
-**Prioridade:** Alta
-**Previsão:** Q2 2025
-
-- [ ] Criar paciente
-- [ ] Buscar paciente
-- [ ] Listar pacientes
-- [ ] Atualizar paciente
-- [ ] Deletar paciente
-- [ ] Vincular paciente a prescritor
-
-### v0.4.0 - Validações
-**Prioridade:** Média
-**Previsão:** Q2 2025
-
+### Validações
 - [ ] Validação de CPF
 - [ ] Validação de datas
 - [ ] Validação de conselho profissional
-- [ ] Validação de CEP
 - [ ] Validação de telefone
 - [ ] Helper de formatação
 
----
-
-## Planejado (Futuro)
-
-### API - Protocolos
-**Prioridade:** Baixa
-
-- [ ] Criar protocolo (template de prescrição)
-- [ ] Buscar protocolo
-- [ ] Listar protocolos
-- [ ] Atualizar protocolo
-- [ ] Deletar protocolo
-- [ ] Aplicar protocolo a prescrição
-
 ### Integrações
-**Prioridade:** Baixa
-
 - [ ] Plugin para Express.js
 - [ ] Plugin para Fastify
 - [ ] Plugin para NestJS
 - [ ] Middleware de autenticação
 
 ### Performance
-**Prioridade:** Baixa
-
-- [ ] Connection pooling
-- [ ] Request batching
-- [ ] Cache persistente (Redis, arquivo)
-- [ ] Compressão de requests
+- [ ] Cache de tokens
+- [ ] Cache de especialidades/cidades
+- [ ] Retry automático em erros 5xx
 
 ### Qualidade
-**Prioridade:** Alta (contínuo)
-
-- [ ] Cobertura de testes > 90%
 - [ ] Testes de integração com API real
 - [ ] Testes E2E
-- [ ] Benchmarks de performance
+- [ ] Cobertura de testes > 90%
 
 ---
 
-## Priorização
+## Como Sugerir Features
 
-### Critérios
-1. **Impacto no usuário** - Quantos usuários se beneficiam?
-2. **Complexidade** - Quanto esforço é necessário?
-3. **Dependências** - Bloqueia outras features?
-4. **Feedback** - Quantas solicitações recebemos?
-
-### Como Sugerir Features
-
-Tem uma ideia? [Abra uma issue](https://github.com/seu-usuario/memed-node/issues/new) com:
+Tem uma ideia? [Abra uma issue](https://github.com/gustavdlima/memed-node/issues/new) com:
 
 - **Título claro**: ex: "Feature: Suporte a webhooks"
 - **Descrição do problema** que a feature resolve
 - **Proposta de solução** com exemplos de uso
 - **Benefícios** para outros usuários
-- **Alternativas** consideradas
 
 ---
 
@@ -164,10 +116,10 @@ Tem uma ideia? [Abra uma issue](https://github.com/seu-usuario/memed-node/issues
 
 - [← Voltar ao README principal](../README.md)
 - [Documentação](./README.md)
-- [Reportar bugs](https://github.com/seu-usuario/memed-node/issues/new)
-- [Sugerir features](https://github.com/seu-usuario/memed-node/issues/new)
+- [Reportar bugs](https://github.com/gustavdlima/memed-node/issues/new)
+- [Sugerir features](https://github.com/gustavdlima/memed-node/issues/new)
 
 ---
 
-**Última atualização:** Fevereiro 2025
-**Mantenedores:** [@gustavdlima](https://github.com/seu-usuario)
+**Última atualização:** Março 2026
+**Mantenedores:** [@gustavdlima](https://github.com/gustavdlima)
